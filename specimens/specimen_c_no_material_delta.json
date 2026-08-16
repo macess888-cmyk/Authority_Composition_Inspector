@@ -1,0 +1,46 @@
+{
+  "specimen_id": "ACE-C-001",
+  "role": "no_material_delta_control",
+  "capability_a": {
+    "capability_id": "READ_RECORD",
+    "action": "read",
+    "resource": "record_gamma"
+  },
+  "capability_b": {
+    "capability_id": "FORMAT_RECORD",
+    "action": "format",
+    "resource": "record_gamma"
+  },
+  "authority_evidence": {
+    "grant_id": "GRANT-C-001",
+    "issuer": "synthetic_competent_authority",
+    "covers": [
+      "READ_RECORD",
+      "FORMAT_RECORD"
+    ],
+    "scope": "local non-persistent representation only"
+  },
+  "composition": {
+    "composition_id": "COMP-C-001",
+    "sequence": [
+      "READ_RECORD",
+      "FORMAT_RECORD"
+    ],
+    "resulting_capability": "READ_AND_FORMAT_RECORD"
+  },
+  "candidate_material_delta": {
+    "present": false,
+    "dimensions": []
+  },
+  "constraints": {
+    "persistent_write": false,
+    "external_effect": false,
+    "new_target": false,
+    "new_recipient": false,
+    "new_binding_force": false
+  },
+  "control_expectation": {
+    "material_delta": "NOT_ESTABLISHED",
+    "authority_delta": "NO_MATERIAL_DELTA"
+  }
+}

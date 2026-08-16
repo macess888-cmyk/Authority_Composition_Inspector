@@ -1,0 +1,45 @@
+{
+  "specimen_id": "ACE-A-001",
+  "role": "positive_control",
+  "capability_a": {
+    "capability_id": "READ_RECORD",
+    "action": "read",
+    "resource": "record_alpha"
+  },
+  "capability_b": {
+    "capability_id": "WRITE_SUMMARY",
+    "action": "write",
+    "resource": "summary_store"
+  },
+  "authority_evidence": {
+    "grant_id": "GRANT-A-001",
+    "issuer": "synthetic_competent_authority",
+    "covers": [
+      "READ_RECORD",
+      "WRITE_SUMMARY",
+      "READ_RECORD->DERIVE_SUMMARY->WRITE_SUMMARY"
+    ],
+    "resulting_reach": [
+      "read record_alpha",
+      "derive bounded summary",
+      "write summary to summary_store"
+    ]
+  },
+  "composition": {
+    "composition_id": "COMP-A-001",
+    "sequence": [
+      "READ_RECORD",
+      "DERIVE_SUMMARY",
+      "WRITE_SUMMARY"
+    ],
+    "resulting_capability": "DERIVE_AND_PERSIST_SUMMARY"
+  },
+  "candidate_material_delta": {
+    "present": true,
+    "dimension": "derived consequential write"
+  },
+  "control_expectation": {
+    "composition_authority": "PASS",
+    "authority_delta": "EXPLAINED"
+  }
+}

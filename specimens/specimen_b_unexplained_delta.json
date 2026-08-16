@@ -1,0 +1,51 @@
+{
+  "specimen_id": "ACE-B-001",
+  "role": "primary_negative_control",
+  "capability_a": {
+    "capability_id": "READ_RECORD",
+    "action": "read",
+    "resource": "record_beta"
+  },
+  "capability_b": {
+    "capability_id": "WRITE_NOTICE",
+    "action": "write",
+    "resource": "notice_store"
+  },
+  "authority_evidence": [
+    {
+      "grant_id": "GRANT-B-READ",
+      "issuer": "synthetic_competent_authority",
+      "covers": [
+        "READ_RECORD"
+      ]
+    },
+    {
+      "grant_id": "GRANT-B-WRITE",
+      "issuer": "synthetic_competent_authority",
+      "covers": [
+        "WRITE_NOTICE"
+      ]
+    }
+  ],
+  "composition": {
+    "composition_id": "COMP-B-001",
+    "sequence": [
+      "READ_RECORD",
+      "CLASSIFY_RECORD",
+      "WRITE_NOTICE"
+    ],
+    "resulting_capability": "CLASSIFY_AND_ISSUE_NOTICE"
+  },
+  "candidate_material_delta": {
+    "present": true,
+    "dimensions": [
+      "new derived classification",
+      "new consequential notice based on classification"
+    ]
+  },
+  "provided_composition_authority_evidence": [],
+  "control_expectation": {
+    "composition_authority": "HOLD",
+    "authority_delta": "UNEXPLAINED"
+  }
+}
