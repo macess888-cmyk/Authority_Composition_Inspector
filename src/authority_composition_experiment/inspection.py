@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 from .models import (
+    AuthorityBasisFinding,
+    AuthorityCompetenceFinding,
+    AuthorityDeltaDiagnostic,
     AuthorityDeltaFinding,
     AuthorityDeltaState,
-    AuthorityGrantEvidence,
-    CompositionAuthorityFinding,
+    AuthorityScopeFinding,
     CompositionFinding,
     EvidenceState,
     MaterialDeltaFinding,
@@ -15,64 +17,138 @@ def inspect_authority_delta(
     *,
     composition: CompositionFinding,
     material_delta: MaterialDeltaFinding,
-    composition_authority: CompositionAuthorityFinding,
-    grants: tuple[AuthorityGrantEvidence, ...],
+    authority_basis: AuthorityBasisFinding,
+    authority_competence: AuthorityCompetenceFinding,
+    authority_scope: AuthorityScopeFinding,
 ) -> AuthorityDeltaFinding:
-    """Inspect whether a material composed reach has explained authority standing."""
+    """Inspect whether verified authority findings explain composed material reach."""
+
+    if material_delta.composition_id != composition.composition_id:
+        return AuthorityDeltaFinding(
+            composition_id=composition.composition_id,
+            state=AuthorityDeltaState.HOLD,
+            diagnostics=(),
+            explanation_authority_basis_ids=(),
+        )
+
+    if authority_basis.composition_id != composition.composition_id:
+        return AuthorityDeltaFinding(
+            composition_id=composition.composition_id,
+            state=AuthorityDeltaState.HOLD,
+            diagnostics=(),
+            explanation_authority_basis_ids=(),
+        )
+
+    if authority_scope.composition_id != composition.composition_id:
+        return AuthorityDeltaFinding(
+            composition_id=composition.composition_id,
+            state=AuthorityDeltaState.HOLD,
+            diagnostics=(),
+            explanation_authority_basis_ids=(),
+        )
+
+    if (
+        authority_basis.resulting_capability_id
+        != composition.resulting_capability_id
+    ):
+        return AuthorityDeltaFinding(
+            composition_id=composition.composition_id,
+            state=AuthorityDeltaState.HOLD,
+            diagnostics=(),
+            explanation_authority_basis_ids=(),
+        )
+
+    if (
+        authority_scope.resulting_capability_id
+        != composition.resulting_capability_id
+    ):
+        return AuthorityDeltaFinding(
+            composition_id=composition.composition_id,
+            state=AuthorityDeltaState.HOLD,
+            diagnostics=(),
+            explanation_authority_basis_ids=(),
+        )
+
+    if (
+        authority_basis.authority_basis_id
+        != authority_competence.authority_basis_id
+        or authority_basis.authority_basis_id
+        != authority_scope.authority_basis_id
+    ):
+        return AuthorityDeltaFinding(
+            composition_id=composition.composition_id,
+            state=AuthorityDeltaState.HOLD,
+            diagnostics=(),
+            explanation_authority_basis_ids=(),
+        )
 
     if composition.state is not EvidenceState.PASS:
         return AuthorityDeltaFinding(
             composition_id=composition.composition_id,
             state=AuthorityDeltaState.HOLD,
-            explanation_grant_ids=(),
+            diagnostics=(),
+            explanation_authority_basis_ids=(),
         )
 
     if material_delta.state is EvidenceState.NOT_ESTABLISHED:
         return AuthorityDeltaFinding(
             composition_id=composition.composition_id,
             state=AuthorityDeltaState.NO_MATERIAL_DELTA,
-            explanation_grant_ids=(),
+            diagnostics=(),
+            explanation_authority_basis_ids=(),
         )
 
     if material_delta.state is not EvidenceState.PASS:
         return AuthorityDeltaFinding(
             composition_id=composition.composition_id,
             state=AuthorityDeltaState.HOLD,
-            explanation_grant_ids=(),
+            diagnostics=(),
+            explanation_authority_basis_ids=(),
         )
 
     if not material_delta.dimensions:
         return AuthorityDeltaFinding(
             composition_id=composition.composition_id,
             state=AuthorityDeltaState.HOLD,
-            explanation_grant_ids=(),
+            diagnostics=(),
+            explanation_authority_basis_ids=(),
         )
 
-    if composition_authority.state is not EvidenceState.PASS:
-        return AuthorityDeltaFinding(
-            composition_id=composition.composition_id,
-            state=AuthorityDeltaState.UNEXPLAINED,
-            explanation_grant_ids=(),
-        )
-
-    matching_grant_ids = tuple(
-        grant.grant_id
-        for grant in grants
-        if grant.grant_id in composition_authority.grant_ids
-        and composition.composition_id in grant.covered_composition_ids
-        and composition.resulting_capability_id
-        in grant.covered_resulting_capabilities
-    )
-
-    if not matching_grant_ids:
+    if authority_basis.state is not EvidenceState.PASS:
         return AuthorityDeltaFinding(
             composition_id=composition.composition_id,
             state=AuthorityDeltaState.HOLD,
-            explanation_grant_ids=(),
+            diagnostics=(
+                AuthorityDeltaDiagnostic.UNEXPLAINED_AUTHORITY_DELTA,
+            ),
+            explanation_authority_basis_ids=(),
+        )
+
+    if authority_competence.state is not EvidenceState.PASS:
+        return AuthorityDeltaFinding(
+            composition_id=composition.composition_id,
+            state=AuthorityDeltaState.HOLD,
+            diagnostics=(
+                AuthorityDeltaDiagnostic.UNEXPLAINED_AUTHORITY_DELTA,
+            ),
+            explanation_authority_basis_ids=(),
+        )
+
+    if authority_scope.state is not EvidenceState.PASS:
+        return AuthorityDeltaFinding(
+            composition_id=composition.composition_id,
+            state=AuthorityDeltaState.HOLD,
+            diagnostics=(
+                AuthorityDeltaDiagnostic.UNEXPLAINED_AUTHORITY_DELTA,
+            ),
+            explanation_authority_basis_ids=(),
         )
 
     return AuthorityDeltaFinding(
         composition_id=composition.composition_id,
         state=AuthorityDeltaState.EXPLAINED,
-        explanation_grant_ids=matching_grant_ids,
+        diagnostics=(),
+        explanation_authority_basis_ids=(
+            authority_basis.authority_basis_id,
+        ),
     )
