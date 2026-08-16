@@ -173,3 +173,61 @@ def test_missing_composition_evidence_cannot_produce_explained_authority_delta()
     )
 
     assert result.state is AuthorityDeltaState.HOLD
+
+
+def test_mismatched_material_delta_composition_id_holds() -> None:
+    composition = CompositionFinding(
+        composition_id="COMP-A-001",
+        state=EvidenceState.PASS,
+        resulting_capability_id="DERIVE_AND_PERSIST_SUMMARY",
+    )
+
+    material_delta = MaterialDeltaFinding(
+        composition_id="COMP-B-001",
+        state=EvidenceState.PASS,
+        dimensions=("derived consequential write",),
+    )
+
+    authority = CompositionAuthorityFinding(
+        composition_id="COMP-A-001",
+        state=EvidenceState.PASS,
+        grant_ids=("GRANT-A-001",),
+    )
+
+    result = inspect_authority_delta(
+        composition=composition,
+        material_delta=material_delta,
+        composition_authority=authority,
+        grants=(),
+    )
+
+    assert result.state is AuthorityDeltaState.HOLD
+
+
+def test_mismatched_composition_authority_id_holds() -> None:
+    composition = CompositionFinding(
+        composition_id="COMP-A-001",
+        state=EvidenceState.PASS,
+        resulting_capability_id="DERIVE_AND_PERSIST_SUMMARY",
+    )
+
+    material_delta = MaterialDeltaFinding(
+        composition_id="COMP-A-001",
+        state=EvidenceState.PASS,
+        dimensions=("derived consequential write",),
+    )
+
+    authority = CompositionAuthorityFinding(
+        composition_id="COMP-B-001",
+        state=EvidenceState.PASS,
+        grant_ids=("GRANT-A-001",),
+    )
+
+    result = inspect_authority_delta(
+        composition=composition,
+        material_delta=material_delta,
+        composition_authority=authority,
+        grants=(),
+    )
+
+    assert result.state is AuthorityDeltaState.HOLD
