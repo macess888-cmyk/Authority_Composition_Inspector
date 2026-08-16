@@ -1,9 +1,9 @@
 from authority_composition_experiment.models import (
+    AuthorityBasisFinding,
+    AuthorityCompetenceFinding,
     AuthorityDeltaDiagnostic,
     AuthorityDeltaFinding,
     AuthorityDeltaState,
-    AuthorityBasisFinding,
-    AuthorityCompetenceFinding,
     AuthorityScopeFinding,
     EvidenceState,
 )

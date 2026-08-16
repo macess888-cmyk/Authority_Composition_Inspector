@@ -12,9 +12,12 @@ class EvidenceState(str, Enum):
 
 class AuthorityDeltaState(str, Enum):
     EXPLAINED = "EXPLAINED"
-    UNEXPLAINED = "UNEXPLAINED"
     NO_MATERIAL_DELTA = "NO_MATERIAL_DELTA"
     HOLD = "HOLD"
+
+
+class AuthorityDeltaDiagnostic(str, Enum):
+    UNEXPLAINED_AUTHORITY_DELTA = "UNEXPLAINED_AUTHORITY_DELTA"
 
 
 @dataclass(frozen=True)
@@ -81,7 +84,30 @@ class CompositionAuthorityFinding:
 
 
 @dataclass(frozen=True)
+class AuthorityBasisFinding:
+    authority_basis_id: str
+    composition_id: str
+    resulting_capability_id: str
+    state: EvidenceState
+
+
+@dataclass(frozen=True)
+class AuthorityCompetenceFinding:
+    authority_basis_id: str
+    state: EvidenceState
+
+
+@dataclass(frozen=True)
+class AuthorityScopeFinding:
+    authority_basis_id: str
+    composition_id: str
+    resulting_capability_id: str
+    state: EvidenceState
+
+
+@dataclass(frozen=True)
 class AuthorityDeltaFinding:
     composition_id: str
     state: AuthorityDeltaState
-    explanation_grant_ids: tuple[str, ...]
+    diagnostics: tuple[AuthorityDeltaDiagnostic, ...]
+    explanation_authority_basis_ids: tuple[str, ...]
