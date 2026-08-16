@@ -141,5 +141,3 @@ def bind_specimen(path: Path) -> BoundSpecimen:
         composition_authority=composition_authority,
         grants=grants,
     )
-
-
