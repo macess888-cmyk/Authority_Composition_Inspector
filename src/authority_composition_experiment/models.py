@@ -28,15 +28,6 @@ class CapabilityIdentity:
 
 
 @dataclass(frozen=True)
-class AuthorityGrantEvidence:
-    grant_id: str
-    issuer: str
-    covered_capability_ids: tuple[str, ...]
-    covered_composition_ids: tuple[str, ...] = ()
-    covered_resulting_capabilities: tuple[str, ...] = ()
-
-
-@dataclass(frozen=True)
 class CompositionEvidence:
     composition_id: str
     component_capability_ids: tuple[str, ...]
@@ -56,13 +47,6 @@ class CapabilityFinding:
 
 
 @dataclass(frozen=True)
-class ComponentAuthorityFinding:
-    capability_id: str
-    state: EvidenceState
-    grant_ids: tuple[str, ...]
-
-
-@dataclass(frozen=True)
 class CompositionFinding:
     composition_id: str
     state: EvidenceState
@@ -74,13 +58,6 @@ class MaterialDeltaFinding:
     composition_id: str
     state: EvidenceState
     dimensions: tuple[str, ...]
-
-
-@dataclass(frozen=True)
-class CompositionAuthorityFinding:
-    composition_id: str
-    state: EvidenceState
-    grant_ids: tuple[str, ...]
 
 
 @dataclass(frozen=True)

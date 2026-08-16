@@ -3,14 +3,14 @@ from dataclasses import FrozenInstanceError
 import pytest
 
 from authority_composition_experiment.models import (
+    AuthorityBasisFinding,
+    AuthorityCompetenceFinding,
     AuthorityDeltaDiagnostic,
     AuthorityDeltaFinding,
     AuthorityDeltaState,
-    AuthorityGrantEvidence,
+    AuthorityScopeFinding,
     CapabilityFinding,
     CapabilityIdentity,
-    ComponentAuthorityFinding,
-    CompositionAuthorityFinding,
     CompositionEvidence,
     CompositionFinding,
     EvidenceState,
@@ -28,32 +28,6 @@ def test_capability_identity_is_immutable() -> None:
 
     with pytest.raises(FrozenInstanceError):
         capability.action = "write"  # type: ignore[misc]
-
-
-def test_authority_grant_keeps_component_and_composition_coverage_separate() -> None:
-    grant = AuthorityGrantEvidence(
-        grant_id="GRANT-001",
-        issuer="synthetic_competent_authority",
-        covered_capability_ids=("READ_RECORD", "WRITE_SUMMARY"),
-        covered_composition_ids=("COMP-A-001",),
-        covered_resulting_capabilities=("DERIVE_AND_PERSIST_SUMMARY",),
-    )
-
-    assert grant.covered_capability_ids == ("READ_RECORD", "WRITE_SUMMARY")
-    assert grant.covered_composition_ids == ("COMP-A-001",)
-    assert grant.covered_resulting_capabilities == (
-        "DERIVE_AND_PERSIST_SUMMARY",
-    )
-
-
-def test_component_authority_finding_does_not_contain_composition_authority() -> None:
-    finding = ComponentAuthorityFinding(
-        capability_id="READ_RECORD",
-        state=EvidenceState.PASS,
-        grant_ids=("GRANT-READ",),
-    )
-
-    assert not hasattr(finding, "composition_authority")
 
 
 def test_composition_evidence_does_not_assert_authority() -> None:
@@ -78,38 +52,69 @@ def test_material_delta_evidence_does_not_assert_authority() -> None:
     assert not hasattr(delta, "authorized")
 
 
-def test_composition_finding_and_authority_finding_are_distinct() -> None:
+def test_composition_and_authority_basis_findings_are_distinct() -> None:
     composition = CompositionFinding(
         composition_id="COMP-B-001",
         state=EvidenceState.PASS,
         resulting_capability_id="CLASSIFY_AND_ISSUE_NOTICE",
     )
 
-    authority = CompositionAuthorityFinding(
+    basis = AuthorityBasisFinding(
+        authority_basis_id="BASIS-B-001",
         composition_id="COMP-B-001",
+        resulting_capability_id="CLASSIFY_AND_ISSUE_NOTICE",
         state=EvidenceState.HOLD,
-        grant_ids=(),
     )
 
     assert composition.state is EvidenceState.PASS
-    assert authority.state is EvidenceState.HOLD
+    assert basis.state is EvidenceState.HOLD
 
 
-def test_material_delta_can_pass_while_composition_authority_holds() -> None:
+def test_material_delta_can_pass_while_authority_basis_holds() -> None:
     delta = MaterialDeltaFinding(
         composition_id="COMP-B-001",
         state=EvidenceState.PASS,
         dimensions=("new consequential notice",),
     )
 
-    authority = CompositionAuthorityFinding(
+    basis = AuthorityBasisFinding(
+        authority_basis_id="BASIS-B-001",
         composition_id="COMP-B-001",
+        resulting_capability_id="CLASSIFY_AND_ISSUE_NOTICE",
         state=EvidenceState.HOLD,
-        grant_ids=(),
     )
 
     assert delta.state is EvidenceState.PASS
-    assert authority.state is EvidenceState.HOLD
+    assert basis.state is EvidenceState.HOLD
+
+
+def test_authority_basis_does_not_contain_competence_or_scope() -> None:
+    basis = AuthorityBasisFinding(
+        authority_basis_id="BASIS-A-001",
+        composition_id="COMP-A-001",
+        resulting_capability_id="DERIVE_AND_PERSIST_SUMMARY",
+        state=EvidenceState.PASS,
+    )
+
+    assert not hasattr(basis, "competence")
+    assert not hasattr(basis, "scope")
+
+
+def test_authority_competence_and_scope_are_distinct() -> None:
+    competence = AuthorityCompetenceFinding(
+        authority_basis_id="BASIS-A-001",
+        state=EvidenceState.PASS,
+    )
+
+    scope = AuthorityScopeFinding(
+        authority_basis_id="BASIS-A-001",
+        composition_id="COMP-A-001",
+        resulting_capability_id="DERIVE_AND_PERSIST_SUMMARY",
+        state=EvidenceState.HOLD,
+    )
+
+    assert competence.state is EvidenceState.PASS
+    assert scope.state is EvidenceState.HOLD
 
 
 def test_unexplained_authority_delta_diagnostic_does_not_mean_unauthorized() -> None:
@@ -150,17 +155,18 @@ def test_no_material_delta_is_distinct_from_explained_delta() -> None:
     assert explained.state is AuthorityDeltaState.EXPLAINED
 
 
-def test_capability_pass_does_not_promote_component_authority() -> None:
+def test_capability_pass_does_not_promote_authority_basis() -> None:
     capability = CapabilityFinding(
         capability_id="READ_RECORD",
         state=EvidenceState.PASS,
     )
 
-    authority = ComponentAuthorityFinding(
-        capability_id="READ_RECORD",
+    basis = AuthorityBasisFinding(
+        authority_basis_id="BASIS-READ",
+        composition_id="COMP-READ",
+        resulting_capability_id="READ_RECORD",
         state=EvidenceState.HOLD,
-        grant_ids=(),
     )
 
     assert capability.state is EvidenceState.PASS
-    assert authority.state is EvidenceState.HOLD
+    assert basis.state is EvidenceState.HOLD
