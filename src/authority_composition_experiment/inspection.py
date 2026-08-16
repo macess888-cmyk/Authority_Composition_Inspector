@@ -41,6 +41,13 @@ def inspect_authority_delta(
             explanation_grant_ids=(),
         )
 
+    if not material_delta.dimensions:
+        return AuthorityDeltaFinding(
+            composition_id=composition.composition_id,
+            state=AuthorityDeltaState.HOLD,
+            explanation_grant_ids=(),
+        )
+
     if composition_authority.state is not EvidenceState.PASS:
         return AuthorityDeltaFinding(
             composition_id=composition.composition_id,
