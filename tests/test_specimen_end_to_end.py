@@ -2,44 +2,48 @@ import json
 from pathlib import Path
 
 from authority_composition_experiment.inspection import inspect_authority_delta
-from authority_composition_experiment.models import AuthorityDeltaState
+from authority_composition_experiment.models import (
+    AuthorityDeltaDiagnostic,
+    AuthorityDeltaState,
+)
 from authority_composition_experiment.specimen_binding import bind_specimen
 
 SPECIMENS = Path(__file__).parent.parent / "specimens"
 
 
-def inspect_specimen(filename: str) -> AuthorityDeltaState:
+def inspect_specimen(filename: str):
     bound = bind_specimen(SPECIMENS / filename)
 
-    result = inspect_authority_delta(
+    return inspect_authority_delta(
         composition=bound.composition,
         material_delta=bound.material_delta,
-        composition_authority=bound.composition_authority,
-        grants=bound.grants,
+        authority_basis=bound.authority_basis,
+        authority_competence=bound.authority_competence,
+        authority_scope=bound.authority_scope,
     )
-
-    return result.state
 
 
 def test_specimen_a_is_explained() -> None:
-    assert (
-        inspect_specimen("specimen_a_explicit_coverage.json")
-        is AuthorityDeltaState.EXPLAINED
-    )
+    result = inspect_specimen("specimen_a_explicit_coverage.json")
+
+    assert result.state is AuthorityDeltaState.EXPLAINED
+    assert result.diagnostics == ()
 
 
-def test_specimen_b_is_unexplained() -> None:
-    assert (
-        inspect_specimen("specimen_b_unexplained_delta.json")
-        is AuthorityDeltaState.UNEXPLAINED
+def test_specimen_b_holds_with_unexplained_authority_delta() -> None:
+    result = inspect_specimen("specimen_b_unexplained_delta.json")
+
+    assert result.state is AuthorityDeltaState.HOLD
+    assert result.diagnostics == (
+        AuthorityDeltaDiagnostic.UNEXPLAINED_AUTHORITY_DELTA,
     )
 
 
 def test_specimen_c_has_no_material_delta() -> None:
-    assert (
-        inspect_specimen("specimen_c_no_material_delta.json")
-        is AuthorityDeltaState.NO_MATERIAL_DELTA
-    )
+    result = inspect_specimen("specimen_c_no_material_delta.json")
+
+    assert result.state is AuthorityDeltaState.NO_MATERIAL_DELTA
+    assert result.diagnostics == ()
 
 
 def test_control_expectation_is_not_used_as_inspection_input(
@@ -65,11 +69,15 @@ def test_control_expectation_is_not_used_as_inspection_input(
     result = inspect_authority_delta(
         composition=bound.composition,
         material_delta=bound.material_delta,
-        composition_authority=bound.composition_authority,
-        grants=bound.grants,
+        authority_basis=bound.authority_basis,
+        authority_competence=bound.authority_competence,
+        authority_scope=bound.authority_scope,
     )
 
-    assert result.state is AuthorityDeltaState.UNEXPLAINED
+    assert result.state is AuthorityDeltaState.HOLD
+    assert result.diagnostics == (
+        AuthorityDeltaDiagnostic.UNEXPLAINED_AUTHORITY_DELTA,
+    )
 
 
 def test_binding_does_not_expose_control_expectation() -> None:
@@ -79,3 +87,13 @@ def test_binding_does_not_expose_control_expectation() -> None:
 
     assert not hasattr(bound, "control_expectation")
     assert not hasattr(bound, "expected_result")
+
+
+def test_synthetic_binding_does_not_expose_real_world_authority_claims() -> None:
+    bound = bind_specimen(
+        SPECIMENS / "specimen_a_explicit_coverage.json"
+    )
+
+    assert not hasattr(bound, "legal")
+    assert not hasattr(bound, "jurisdiction")
+    assert not hasattr(bound, "authorized_execution")

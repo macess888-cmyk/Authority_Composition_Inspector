@@ -6,8 +6,9 @@ from pathlib import Path
 from typing import Any
 
 from .models import (
-    AuthorityGrantEvidence,
-    CompositionAuthorityFinding,
+    AuthorityBasisFinding,
+    AuthorityCompetenceFinding,
+    AuthorityScopeFinding,
     CompositionFinding,
     EvidenceState,
     MaterialDeltaFinding,
@@ -19,8 +20,9 @@ class BoundSpecimen:
     specimen_id: str
     composition: CompositionFinding
     material_delta: MaterialDeltaFinding
-    composition_authority: CompositionAuthorityFinding
-    grants: tuple[AuthorityGrantEvidence, ...]
+    authority_basis: AuthorityBasisFinding
+    authority_competence: AuthorityCompetenceFinding
+    authority_scope: AuthorityScopeFinding
 
 
 def _load_json(path: Path) -> dict[str, Any]:
@@ -33,19 +35,14 @@ def _load_json(path: Path) -> dict[str, Any]:
     return data
 
 
-def _grant_from_mapping(data: dict[str, Any]) -> AuthorityGrantEvidence:
-    covers = tuple(str(value) for value in data.get("covers", ()))
-
-    return AuthorityGrantEvidence(
-        grant_id=str(data["grant_id"]),
-        issuer=str(data["issuer"]),
-        covered_capability_ids=covers,
-        covered_composition_ids=(),
-        covered_resulting_capabilities=(),
-    )
-
-
 def bind_specimen(path: Path) -> BoundSpecimen:
+    """
+    Form synthetic v0.1 findings from a bounded control specimen.
+
+    This adapter is test infrastructure only.
+
+    Synthetic finding formation is not real-world authority verification.
+    """
     data = _load_json(path)
 
     specimen_id = str(data["specimen_id"])
@@ -53,15 +50,16 @@ def bind_specimen(path: Path) -> BoundSpecimen:
     delta_data = data["candidate_material_delta"]
 
     composition_id = str(composition_data["composition_id"])
-    resulting_capability = str(composition_data["resulting_capability"])
+    resulting_capability_id = str(
+        composition_data["resulting_capability"]
+    )
 
     composition = CompositionFinding(
         composition_id=composition_id,
         state=EvidenceState.PASS,
-        resulting_capability_id=resulting_capability,
+        resulting_capability_id=resulting_capability_id,
     )
 
-    delta_present = bool(delta_data["present"])
     dimensions_raw = delta_data.get("dimensions")
     dimensions: tuple[str, ...]
 
@@ -75,7 +73,7 @@ def bind_specimen(path: Path) -> BoundSpecimen:
         composition_id=composition_id,
         state=(
             EvidenceState.PASS
-            if delta_present
+            if bool(delta_data["present"])
             else EvidenceState.NOT_ESTABLISHED
         ),
         dimensions=dimensions,
@@ -83,61 +81,102 @@ def bind_specimen(path: Path) -> BoundSpecimen:
 
     authority_raw = data["authority_evidence"]
 
-    grants: tuple[AuthorityGrantEvidence, ...]
+    basis_id = f"SYNTHETIC-BASIS-{specimen_id}"
+
+    composition_covered = False
+    resulting_capability_covered = False
+
+    def _apply_synthetic_coverage(
+        covers: tuple[str, ...],
+    ) -> tuple[bool, bool]:
+        explicit_composition_coverage = any(
+            composition_id in value or "->" in value
+            for value in covers
+        )
+
+        explicit_resulting_coverage = (
+            resulting_capability_id in covers
+            or explicit_composition_coverage
+        )
+
+        return (
+            explicit_composition_coverage,
+            explicit_resulting_coverage,
+        )
 
     if isinstance(authority_raw, list):
-        grants = tuple(
-            _grant_from_mapping(grant)
-            for grant in authority_raw
-        )
+        for grant in authority_raw:
+            covers = tuple(
+                str(value)
+                for value in grant.get("covers", ())
+            )
+
+            (
+                grant_composition_covered,
+                grant_resulting_covered,
+            ) = _apply_synthetic_coverage(covers)
+
+            composition_covered = (
+                composition_covered
+                or grant_composition_covered
+            )
+
+            resulting_capability_covered = (
+                resulting_capability_covered
+                or grant_resulting_covered
+            )
     else:
-        grant = _grant_from_mapping(authority_raw)
-
-        explicit_composition_coverage = (
-            composition_id
-            if any("->" in item for item in grant.covered_capability_ids)
-            else None
+        covers = tuple(
+            str(value)
+            for value in authority_raw.get("covers", ())
         )
 
-        grants = (
-            AuthorityGrantEvidence(
-                grant_id=grant.grant_id,
-                issuer=grant.issuer,
-                covered_capability_ids=grant.covered_capability_ids,
-                covered_composition_ids=(
-                    ()
-                    if explicit_composition_coverage is None
-                    else (composition_id,)
-                ),
-                covered_resulting_capabilities=(
-                    ()
-                    if explicit_composition_coverage is None
-                    else (resulting_capability,)
-                ),
-            ),
-        )
+        (
+            composition_covered,
+            resulting_capability_covered,
+        ) = _apply_synthetic_coverage(covers)
 
-    matching_grant_ids: tuple[str, ...] = tuple(
-        grant.grant_id
-        for grant in grants
-        if composition_id in grant.covered_composition_ids
-        and resulting_capability in grant.covered_resulting_capabilities
+    authority_explained = (
+        composition_covered
+        and resulting_capability_covered
     )
 
-    composition_authority = CompositionAuthorityFinding(
+    authority_basis = AuthorityBasisFinding(
+        authority_basis_id=basis_id,
         composition_id=composition_id,
+        resulting_capability_id=resulting_capability_id,
         state=(
             EvidenceState.PASS
-            if matching_grant_ids
+            if authority_explained
             else EvidenceState.HOLD
         ),
-        grant_ids=matching_grant_ids,
+    )
+
+    authority_competence = AuthorityCompetenceFinding(
+        authority_basis_id=basis_id,
+        state=(
+            EvidenceState.PASS
+            if authority_explained
+            else EvidenceState.HOLD
+        ),
+    )
+
+    authority_scope = AuthorityScopeFinding(
+        authority_basis_id=basis_id,
+        composition_id=composition_id,
+        resulting_capability_id=resulting_capability_id,
+        state=(
+            EvidenceState.PASS
+            if authority_explained
+            else EvidenceState.HOLD
+        ),
     )
 
     return BoundSpecimen(
         specimen_id=specimen_id,
         composition=composition,
         material_delta=material_delta,
-        composition_authority=composition_authority,
-        grants=grants,
+        authority_basis=authority_basis,
+        authority_competence=authority_competence,
+        authority_scope=authority_scope,
     )

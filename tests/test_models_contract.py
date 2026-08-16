@@ -3,6 +3,7 @@ from dataclasses import FrozenInstanceError
 import pytest
 
 from authority_composition_experiment.models import (
+    AuthorityDeltaDiagnostic,
     AuthorityDeltaFinding,
     AuthorityDeltaState,
     AuthorityGrantEvidence,
@@ -111,14 +112,20 @@ def test_material_delta_can_pass_while_composition_authority_holds() -> None:
     assert authority.state is EvidenceState.HOLD
 
 
-def test_unexplained_authority_delta_does_not_mean_unauthorized() -> None:
+def test_unexplained_authority_delta_diagnostic_does_not_mean_unauthorized() -> None:
     finding = AuthorityDeltaFinding(
         composition_id="COMP-B-001",
-        state=AuthorityDeltaState.UNEXPLAINED,
-        explanation_grant_ids=(),
+        state=AuthorityDeltaState.HOLD,
+        diagnostics=(
+            AuthorityDeltaDiagnostic.UNEXPLAINED_AUTHORITY_DELTA,
+        ),
+        explanation_authority_basis_ids=(),
     )
 
-    assert finding.state is AuthorityDeltaState.UNEXPLAINED
+    assert finding.state is AuthorityDeltaState.HOLD
+    assert finding.diagnostics == (
+        AuthorityDeltaDiagnostic.UNEXPLAINED_AUTHORITY_DELTA,
+    )
     assert not hasattr(finding, "unauthorized")
     assert not hasattr(finding, "illegal")
     assert not hasattr(finding, "unsafe")
@@ -128,13 +135,15 @@ def test_no_material_delta_is_distinct_from_explained_delta() -> None:
     no_delta = AuthorityDeltaFinding(
         composition_id="COMP-C-001",
         state=AuthorityDeltaState.NO_MATERIAL_DELTA,
-        explanation_grant_ids=(),
+        diagnostics=(),
+        explanation_authority_basis_ids=(),
     )
 
     explained = AuthorityDeltaFinding(
         composition_id="COMP-A-001",
         state=AuthorityDeltaState.EXPLAINED,
-        explanation_grant_ids=("GRANT-A-001",),
+        diagnostics=(),
+        explanation_authority_basis_ids=("BASIS-A-001",),
     )
 
     assert no_delta.state is AuthorityDeltaState.NO_MATERIAL_DELTA
