@@ -26,6 +26,16 @@ Unexplained Authority Delta
 
 A composed capability exhibits new reach, persistence, binding force, scope, or consequence for which no competent authority grant has yet been established.
 
+## Connected Experimental Surface
+
+A related upstream question is tracked separately:
+
+[AUTHORITY MUTATION SPECIMEN 001](docs/AUTHORITY_MUTATION_SPECIMEN_001.md)
+
+This asks whether a transition that changes a rule, permission, delegation, policy, or authority state was itself competently authorized.
+
+The connection does not establish a new inspector or expand authority.
+
 ## Non-Claims
 
 This experiment does not establish that:
