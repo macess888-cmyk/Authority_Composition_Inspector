@@ -1,0 +1,21 @@
+{
+  "case_id": "AM-02_UNAUTHORIZED_PERMISSION_EXPANSION",
+  "description": "Delegated scope expands without an established authority basis for the mutation.",
+  "prior_authority_state": {
+    "policy_version": "P1",
+    "delegated_scope": ["READ_RECORD"]
+  },
+  "mutation": {
+    "present": true,
+    "actor": "SERVICE_OPERATOR",
+    "basis_id": null,
+    "basis_status": null,
+    "basis_scope": [],
+    "requested_scope_change": ["WRITE_SUMMARY"]
+  },
+  "resulting_authority_state": {
+    "policy_version": "P2",
+    "delegated_scope": ["READ_RECORD", "WRITE_SUMMARY"]
+  },
+  "expected_standing": "MUTATION_AUTHORITY_MISSING"
+}

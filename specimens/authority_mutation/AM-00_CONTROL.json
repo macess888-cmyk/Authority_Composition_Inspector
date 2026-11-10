@@ -1,0 +1,19 @@
+{
+  "case_id": "AM-00_CONTROL",
+  "description": "No authority mutation. Existing authority state remains unchanged.",
+  "prior_authority_state": {
+    "policy_version": "P1",
+    "delegated_scope": ["READ_RECORD"]
+  },
+  "mutation": {
+    "present": false,
+    "actor": null,
+    "basis_id": null,
+    "requested_scope_change": []
+  },
+  "resulting_authority_state": {
+    "policy_version": "P1",
+    "delegated_scope": ["READ_RECORD"]
+  },
+  "expected_standing": "NO_MUTATION"
+}

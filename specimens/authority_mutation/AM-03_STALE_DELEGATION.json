@@ -1,0 +1,21 @@
+{
+  "case_id": "AM-03_STALE_DELEGATION",
+  "description": "A previously valid mutation basis is stale at evaluation time.",
+  "prior_authority_state": {
+    "policy_version": "P1",
+    "delegated_scope": ["READ_RECORD"]
+  },
+  "mutation": {
+    "present": true,
+    "actor": "POLICY_STEWARD",
+    "basis_id": "MUT-BASIS-002",
+    "basis_status": "STALE",
+    "basis_scope": ["READ_RECORD", "WRITE_SUMMARY"],
+    "requested_scope_change": ["WRITE_SUMMARY"]
+  },
+  "resulting_authority_state": {
+    "policy_version": "P2",
+    "delegated_scope": ["READ_RECORD", "WRITE_SUMMARY"]
+  },
+  "expected_standing": "MUTATION_AUTHORITY_STALE"
+}

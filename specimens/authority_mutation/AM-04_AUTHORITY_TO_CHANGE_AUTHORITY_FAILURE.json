@@ -1,0 +1,25 @@
+{
+  "case_id": "AM-04_AUTHORITY_TO_CHANGE_AUTHORITY_FAILURE",
+  "description": "The actor may operate under the policy but has no established standing to change that policy.",
+  "prior_authority_state": {
+    "policy_version": "P1",
+    "delegated_scope": ["READ_RECORD", "WRITE_SUMMARY"]
+  },
+  "mutation": {
+    "present": true,
+    "actor": "WORKFLOW_AGENT",
+    "basis_id": "OPERATION-BASIS-001",
+    "basis_status": "CURRENT",
+    "basis_scope": ["READ_RECORD", "WRITE_SUMMARY"],
+    "requested_scope_change": ["APPROVE_PAYMENT"]
+  },
+  "resulting_authority_state": {
+    "policy_version": "P2",
+    "delegated_scope": [
+      "READ_RECORD",
+      "WRITE_SUMMARY",
+      "APPROVE_PAYMENT"
+    ]
+  },
+  "expected_standing": "UNEXPLAINED_AUTHORITY_DELTA"
+}

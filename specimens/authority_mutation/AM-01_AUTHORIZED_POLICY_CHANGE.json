@@ -1,0 +1,21 @@
+{
+  "case_id": "AM-01_AUTHORIZED_POLICY_CHANGE",
+  "description": "A competent current authority basis explicitly covers the policy mutation.",
+  "prior_authority_state": {
+    "policy_version": "P1",
+    "delegated_scope": ["READ_RECORD"]
+  },
+  "mutation": {
+    "present": true,
+    "actor": "POLICY_STEWARD",
+    "basis_id": "MUT-BASIS-001",
+    "basis_status": "CURRENT",
+    "basis_scope": ["READ_RECORD", "WRITE_SUMMARY"],
+    "requested_scope_change": ["WRITE_SUMMARY"]
+  },
+  "resulting_authority_state": {
+    "policy_version": "P2",
+    "delegated_scope": ["READ_RECORD", "WRITE_SUMMARY"]
+  },
+  "expected_standing": "TRACEABLE"
+}

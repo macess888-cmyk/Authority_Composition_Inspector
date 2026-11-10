@@ -1,0 +1,62 @@
+{
+    "artifact":  "DELTA-001 Authority Mutation Reference Freeze",
+    "frozen_at":  "2026-11-10T01:34:02.7424840Z",
+    "repository":  "Authority_Composition_Inspector",
+    "base_head":  "7d76819cb60d41d800216964fe6cd3fa82e423e4",
+    "standing":  "BOUNDED_GREEN",
+    "regression":  {
+                       "passed":  55,
+                       "failed":  0
+                   },
+    "states":  [
+                   "NO_MUTATION",
+                   "TRACEABLE",
+                   "HOLD"
+               ],
+    "diagnostics":  [
+                        "MUTATION_AUTHORITY_MISSING",
+                        "MUTATION_AUTHORITY_STALE",
+                        "UNEXPLAINED_AUTHORITY_DELTA"
+                    ],
+    "boundaries":  [
+                       "TRACEABLE does not mean legally authorized",
+                       "HOLD does not mean illegal or prohibited",
+                       "No execution authority is created",
+                       "Expected specimen standings are test controls only",
+                       "Authority mutation inspection is bounded to the frozen synthetic cases"
+                   ],
+    "files":  [
+                  {
+                      "path":  "specimens/authority_mutation/AM-00_CONTROL.json",
+                      "sha256":  "2A83E738104583FB73FEC4B87E4F51E9EC8E026560475761E316CB03B78CC58C"
+                  },
+                  {
+                      "path":  "specimens/authority_mutation/AM-01_AUTHORIZED_POLICY_CHANGE.json",
+                      "sha256":  "76D10D46A1FDC0E52F9E021550A907EB078F7A7EC84270A6E053726A3E59622C"
+                  },
+                  {
+                      "path":  "specimens/authority_mutation/AM-02_UNAUTHORIZED_PERMISSION_EXPANSION.json",
+                      "sha256":  "F8BCC5BEDCDDF787865B32BF1ED4B6D1180F891FAF47516069ECA86BC5F6D8FF"
+                  },
+                  {
+                      "path":  "specimens/authority_mutation/AM-03_STALE_DELEGATION.json",
+                      "sha256":  "12CCB4FDD0E8DF761A86F35DCA627BB9B7A29CAB7381B3062A273AF3994A6546"
+                  },
+                  {
+                      "path":  "specimens/authority_mutation/AM-04_AUTHORITY_TO_CHANGE_AUTHORITY_FAILURE.json",
+                      "sha256":  "712F356625AEBE4B319D15355D90EE4FEA479AE51912C2C44FEAB5FA5DE241C6"
+                  },
+                  {
+                      "path":  "src/authority_composition_experiment/authority_mutation.py",
+                      "sha256":  "673AE8ABFDFF55E51242060D411EBFB77E33CD0E621FFF41F7F91C1F993ECB3D"
+                  },
+                  {
+                      "path":  "tests/test_authority_mutation_case_contract.py",
+                      "sha256":  "22BA1D7320239419C296E89CE3884B3814E3752982E1CEAB7AD6BB7D1668C27E"
+                  },
+                  {
+                      "path":  "tests/test_authority_mutation_semantics_red.py",
+                      "sha256":  "2A45EDA1935F78B5245D77A6ECC4D381FCAEA53192FDC850E9AD42644E1EB464"
+                  }
+              ]
+}
